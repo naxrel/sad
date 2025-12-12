@@ -145,8 +145,35 @@ describe('Authentication API', () => {
   });
 
   describe('GET /api/auth/users', () => {
-    it('should return list of users', async () => {
+    it('should fail without authentication token', async () => {
       const res = await request(app).get('/api/auth/users');
+
+      expect(res.statusCode).toBe(401);
+      expect(res.body).toHaveProperty('error', 'Access token required');
+    });
+
+    it('should return list of users with valid token', async () => {
+      // First register and login to get a token
+      await request(app)
+        .post('/api/auth/register')
+        .send({
+          username: 'authenticateduser',
+          password: 'password123'
+        });
+
+      const loginRes = await request(app)
+        .post('/api/auth/login')
+        .send({
+          username: 'authenticateduser',
+          password: 'password123'
+        });
+
+      const token = loginRes.body.token;
+
+      // Now access the protected endpoint
+      const res = await request(app)
+        .get('/api/auth/users')
+        .set('Authorization', `Bearer ${token}`);
 
       expect(res.statusCode).toBe(200);
       expect(res.body).toHaveProperty('users');

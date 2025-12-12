@@ -3,9 +3,11 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { validateRegistration, validateLogin } = require('../utils/validators');
+const { authenticateToken } = require('../middleware/auth');
 
 // In-memory user storage (for demo purposes)
 const users = [];
+let userIdCounter = 1;
 
 // Register endpoint
 router.post('/register', async (req, res) => {
@@ -28,7 +30,7 @@ router.post('/register', async (req, res) => {
 
     // Create user
     const user = {
-      id: users.length + 1,
+      id: userIdCounter++,
       username,
       password: hashedPassword,
       createdAt: new Date()
@@ -69,9 +71,14 @@ router.post('/login', async (req, res) => {
     }
 
     // Generate JWT token
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      throw new Error('JWT_SECRET is not configured');
+    }
+    
     const token = jwt.sign(
       { id: user.id, username: user.username },
-      process.env.JWT_SECRET || 'default-secret',
+      jwtSecret,
       { expiresIn: '24h' }
     );
 
@@ -85,8 +92,8 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Get all users (for testing purposes)
-router.get('/users', (req, res) => {
+// Get all users (protected endpoint for testing purposes)
+router.get('/users', authenticateToken, (req, res) => {
   const safeUsers = users.map(u => ({
     id: u.id,
     username: u.username,

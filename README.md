@@ -89,8 +89,12 @@ The server will run on `http://localhost:3000` (or the PORT specified in .env).
   }
   ```
 
-### 3. Get all users
+### 3. Get all users (Protected)
 - **GET** `/api/auth/users`
+- **Headers:**
+  ```
+  Authorization: Bearer <your-jwt-token>
+  ```
 - **Response:**
   ```json
   {
@@ -103,6 +107,7 @@ The server will run on `http://localhost:3000` (or the PORT specified in .env).
     ]
   }
   ```
+- **Note:** This endpoint requires authentication. Include the JWT token from login in the Authorization header.
 
 ## Testing
 

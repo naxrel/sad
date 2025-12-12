@@ -125,8 +125,13 @@ npm run test:watch
 
 - Passwords are hashed using bcrypt before storage
 - JWT tokens are used for authentication
+- Rate limiting is enabled to prevent brute force attacks:
+  - Authentication endpoints (login/register): 5 requests per 15 minutes
+  - General API endpoints: 100 requests per 15 minutes
+  - Rate limiting is disabled in test environment
 - Never commit your `.env` file
 - In production, use a strong, random JWT_SECRET
+- Application fails fast if JWT_SECRET is not configured
 - This is a demo application; in production, use a proper database instead of in-memory storage
 
 ## Technologies Used
@@ -134,6 +139,7 @@ npm run test:watch
 - **Express.js** - Web framework
 - **bcrypt** - Password hashing
 - **jsonwebtoken** - JWT token generation and verification
+- **express-rate-limit** - Rate limiting middleware
 - **dotenv** - Environment variable management
 - **Jest** - Testing framework
 - **Supertest** - HTTP assertion library

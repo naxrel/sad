@@ -4,13 +4,14 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { validateRegistration, validateLogin } = require('../utils/validators');
 const { authenticateToken } = require('../middleware/auth');
+const { authLimiter, apiLimiter } = require('../middleware/rateLimiter');
 
 // In-memory user storage (for demo purposes)
 const users = [];
 let userIdCounter = 1;
 
 // Register endpoint
-router.post('/register', async (req, res) => {
+router.post('/register', authLimiter, async (req, res) => {
   try {
     const { username, password } = req.body;
 
@@ -48,7 +49,7 @@ router.post('/register', async (req, res) => {
 });
 
 // Login endpoint
-router.post('/login', async (req, res) => {
+router.post('/login', authLimiter, async (req, res) => {
   try {
     const { username, password } = req.body;
 
@@ -93,7 +94,7 @@ router.post('/login', async (req, res) => {
 });
 
 // Get all users (protected endpoint for testing purposes)
-router.get('/users', authenticateToken, (req, res) => {
+router.get('/users', apiLimiter, authenticateToken, (req, res) => {
   const safeUsers = users.map(u => ({
     id: u.id,
     username: u.username,
